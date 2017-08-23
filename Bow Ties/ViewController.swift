@@ -21,6 +21,7 @@
  */
 
 import UIKit
+import CoreData
 
 class ViewController: UIViewController {
 
@@ -32,10 +33,58 @@ class ViewController: UIViewController {
   @IBOutlet weak var timesWornLabel: UILabel!
   @IBOutlet weak var lastWornLabel: UILabel!
   @IBOutlet weak var favoriteLabel: UILabel!
+  
+  //MARK: - Properties
+  var managedContext: NSManagedObjectContext!
 
   // MARK: - View Life Cycle
   override func viewDidLoad() {
     super.viewDidLoad()
+    
+    
+  }
+  
+  // Insert sample data
+  func insertSampleData() {
+    let fetch = NSFetchRequest<Bowtie>(entityName: "Bowtie")
+    fetch.predicate = NSPredicate(format: "searchKey != nil")
+    
+    let count = try! managedContext.count(for: fetch)
+    
+    if count > 0 {
+      // SampleData.plist data already in Core Data
+      return
+    }
+    
+    let path = Bundle.main.path(forResource: "SampleData", ofType: "plist")
+    let dataArray = NSArray(contentsOfFile: path!)!
+    
+    for dict in dataArray {
+      let entity = NSEntityDescription.entity(forEntityName: "Bowtie", in: managedContext)!
+      let bowtie = Bowtie(entity: entity, insertInto: managedContext)
+      let btDict = dict as! [String: AnyObject]
+      
+      bowtie.name = btDict["name"] as? String
+      bowtie.searchKey = btDict["searchKey"] as? String
+      bowtie.rating = btDict["rating"] as! Double
+      
+//Color creating from plist
+      let colorDict = btDict["tintColor"] as! [String: AnyObject]
+      bowtie.tintColor = UIColor.color(dict: colorDict)
+//Image creating form plist
+      let imageName = btDict["imageName"] as? String
+      let image = UIImage(named: imageName!)
+      let photoData = UIImagePNGRepresentation(image!)!
+      bowtie.photoData = NSData(data: photoData)
+
+      bowtie.lastWorn = btDict["lastWorn"] as? NSDate
+      let timesNumber = btDict["timesWorn"] as! NSNumber
+      bowtie.timesWorn = timesNumber.int32Value
+      bowtie.isFavorite = btDict["isFavorite"] as! Bool
+    }
+    
+    try! managedContext.save()
+    
   }
 
   // MARK: - IBActions
@@ -51,3 +100,31 @@ class ViewController: UIViewController {
 
   }
 }
+
+
+private extension UIColor {
+  
+  static func color(dict: [String : AnyObject]) -> UIColor? {
+    
+    guard let red = dict["red"] as? NSNumber,
+      let green = dict["green"] as? NSNumber,
+    let blue = dict["blue"] as? NSNumber else {
+      return nil
+    }
+    
+    return UIColor(red: CGFloat(red)/255.0, green: CGFloat(green)/255.0, blue: CGFloat(blue)/255.0, alpha: 1)
+  }
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
