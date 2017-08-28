@@ -24,7 +24,7 @@ import UIKit
 import CoreData
 
 class ViewController: UIViewController {
-
+  
   // MARK: - IBOutlets
   @IBOutlet weak var segmentedControl: UISegmentedControl!
   @IBOutlet weak var imageView: UIImageView!
@@ -36,7 +36,8 @@ class ViewController: UIViewController {
   
   //MARK: - Properties
   var managedContext: NSManagedObjectContext!
-
+  var currentBowtie: Bowtie!
+  
   // MARK: - View Life Cycle
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -50,33 +51,30 @@ class ViewController: UIViewController {
     request.predicate = NSPredicate(format: "searchKey == %@", firstTitle)
     
     do {
-      //3
       let results = try managedContext.fetch(request)
+      currentBowtie = results.first
       
-      //4
-      populate(bowtie: results.first!)
+      populate(bowtie: currentBowtie)
     } catch let error as NSError {
       print("Could not fetch \(error), \(error.userInfo)")
     }
-    
-    
   }
   
   // Populate Bowtie
   func populate(bowtie: Bowtie) {
     
-      guard let imageData = bowtie.photoData as? Data,
-        let lastWorn = bowtie.lastWorn as? Date,
-        let tintColor = bowtie.tintColor as? UIColor else {
-          return
+    guard let imageData = bowtie.photoData as Data!,
+      let lastWorn = bowtie.lastWorn as Date!,
+      let tintColor = bowtie.tintColor as? UIColor else {
+        return
     }
     
     imageView.image = UIImage(data: imageData)
     nameLabel.text = bowtie.name
-    ratingLabel.text = "Rating: \(bowtie.rating)/5"    
+    ratingLabel.text = "Rating: \(bowtie.rating)/5"
     timesWornLabel.text = "# times worn: \(bowtie.timesWorn)"
     
-//MARK: Creating String form Date
+    //MARK: Creating String form Date
     let dateFormatter = DateFormatter()
     dateFormatter.dateStyle = .short
     dateFormatter.timeStyle = .none
@@ -110,15 +108,15 @@ class ViewController: UIViewController {
       bowtie.searchKey = btDict["searchKey"] as? String
       bowtie.rating = btDict["rating"] as! Double
       
-//Color creating from plist
+      //Color creating from plist
       let colorDict = btDict["tintColor"] as! [String: AnyObject]
       bowtie.tintColor = UIColor.color(dict: colorDict)
-//Image creating form plist
+      //Image creating form plist
       let imageName = btDict["imageName"] as? String
       let image = UIImage(named: imageName!)
       let photoData = UIImagePNGRepresentation(image!)!
       bowtie.photoData = NSData(data: photoData)
-
+      
       bowtie.lastWorn = btDict["lastWorn"] as? NSDate
       let timesNumber = btDict["timesWorn"] as! NSNumber
       bowtie.timesWorn = timesNumber.int32Value
@@ -128,18 +126,61 @@ class ViewController: UIViewController {
     try! managedContext.save()
     
   }
-
+  
   // MARK: - IBActions
   @IBAction func segmentedControl(_ sender: AnyObject) {
-
+    
   }
-
+  
   @IBAction func wear(_ sender: AnyObject) {
-
+    
+    let times = currentBowtie.timesWorn
+    currentBowtie.timesWorn = times + 1
+    currentBowtie.lastWorn = NSDate()
+    
+    do {
+      try managedContext.save()
+      populate(bowtie: currentBowtie)
+    } catch let error as NSError {
+      print("Could not save \(error), \(error.userInfo)")
+    }
   }
   
   @IBAction func rate(_ sender: AnyObject) {
-
+    
+    let alert = UIAlertController(title: "New Rating", message: "Rate this bow tie", preferredStyle: .alert)
+    alert.addTextField { (textField) in
+      textField.keyboardType = .decimalPad
+    }
+    
+    let cancelAction = UIAlertAction(title: "Cancel", style: .default, handler: nil)
+    let saveAction = UIAlertAction(title: "Save", style: .default) {
+      [unowned self] action in
+      guard let textField = alert.textFields?.first else {
+        return
+      }
+      self.update(rating: textField.text)
+    }
+    
+    alert.addAction(cancelAction)
+    alert.addAction(saveAction)
+    
+    present(alert, animated: true, completion: nil)
+  }
+  
+  func update(rating: String?) {
+    guard let ratingString = rating,
+      let rating = Double(ratingString) else {
+        return
+    }
+    
+    do {
+      currentBowtie.rating = rating
+      try managedContext.save()
+      populate(bowtie: currentBowtie)
+    } catch let error as NSError {
+      print("Could not save \(error), \(error.userInfo)")
+    }    
   }
 }
 
