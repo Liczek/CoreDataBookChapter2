@@ -73,8 +73,7 @@ class ViewController: UIViewController {
     
     imageView.image = UIImage(data: imageData)
     nameLabel.text = bowtie.name
-    ratingLabel.text = "Rating: \(bowtie.rating)/5"
-    
+    ratingLabel.text = "Rating: \(bowtie.rating)/5"    
     timesWornLabel.text = "# times worn: \(bowtie.timesWorn)"
     
 //MARK: Creating String form Date
