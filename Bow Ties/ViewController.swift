@@ -179,8 +179,14 @@ class ViewController: UIViewController {
       try managedContext.save()
       populate(bowtie: currentBowtie)
     } catch let error as NSError {
-      print("Could not save \(error), \(error.userInfo)")
-    }    
+      
+      if error.domain == NSCocoaErrorDomain &&
+        (error.code == NSValidationNumberTooLargeError || error.code == NSValidationNumberTooSmallError) {
+        rate(currentBowtie)
+      } else {
+        print("Could not save \(error), \(error.userInfo)")
+      }
+    }
   }
 }
 
