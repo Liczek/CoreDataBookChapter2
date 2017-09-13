@@ -21,6 +21,7 @@
  */
 
 import UIKit
+import CoreData
 
 class ViewController: UIViewController {
 
@@ -32,11 +33,56 @@ class ViewController: UIViewController {
   @IBOutlet weak var timesWornLabel: UILabel!
   @IBOutlet weak var lastWornLabel: UILabel!
   @IBOutlet weak var favoriteLabel: UILabel!
+	
+	var managedContext: NSManagedObjectContext!
 
   // MARK: - View Life Cycle
   override func viewDidLoad() {
     super.viewDidLoad()
+		
+		insertSampleData()
+		
+		
+		
   }
+	
+	// Insert sample data
+	func insertSampleData() {
+	
+		let fetch = NSFetchRequest<Bowtie>(entityName: "Bowtie")
+		fetch.predicate = NSPredicate(format: "searchKey != nil")
+		
+		let count = try! managedContext.count(for: fetch)
+		if count > 0 {return}
+		
+		let path = Bundle.main.path(forResource: "SampleData", ofType: "plist")
+		let dataArray = NSArray(contentsOfFile: path!)!
+		
+		for dict in dataArray {
+			
+			let entity = NSEntityDescription.entity(forEntityName: "Bowtie", in: managedContext)!
+			let bowtie = Bowtie(entity: entity, insertInto: managedContext)
+			
+			let btDict = dict as! [String: AnyObject]
+			
+			bowtie.name = btDict["name"] as? String
+			bowtie.searchKey = btDict["searchKey"] as? String
+			bowtie.rating = btDict["rating"] as? NSDecimalNumber
+			bowtie.lastWorn = btDict["lastWorn"] as? NSDate
+			bowtie.timesWorn = btDict["timesWorn"] as! Int32
+			bowtie.isFavorite = btDict["isFavorite"] as! Bool
+			
+			let imageName = btDict["imageName"] as? String
+			let image = UIImage(named: imageName!)
+			let photoData = UIImagePNGRepresentation(image!)!
+			bowtie.photoData = NSData(data: photoData)
+			
+			let colorDict = btDict["tintColor"] as! [String: AnyObject]
+			bowtie.tintColor = UIColor.getTintColor(tintColor: colorDict)
+		}
+	
+		try! managedContext.save()
+	}
 
   // MARK: - IBActions
   @IBAction func segmentedControl(_ sender: AnyObject) {
@@ -50,4 +96,16 @@ class ViewController: UIViewController {
   @IBAction func rate(_ sender: AnyObject) {
 
   }
+}
+
+private extension UIColor {
+	static func getTintColor(tintColor: [String: AnyObject]) -> UIColor? {
+		
+		guard let red = tintColor["red"] as? NSNumber,
+			let green = tintColor["green"] as? NSNumber,
+			let blue = tintColor["blue"] as? NSNumber else {return nil}
+		
+		
+		return UIColor(red: CGFloat(red)/255, green: CGFloat(green)/255, blue: CGFloat(blue)/255, alpha: 1)
+	}
 }

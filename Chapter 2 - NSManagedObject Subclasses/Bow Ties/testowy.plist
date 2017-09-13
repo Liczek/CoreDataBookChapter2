@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<dict>
+		<key>name</key>
+		<string>Pierwszy</string>
+		<key>color</key>
+		<dict>
+			<key>red</key>
+			<integer>0</integer>
+			<key>blue</key>
+			<integer>0</integer>
+			<key>green</key>
+			<integer>0</integer>
+		</dict>
+		<key>lastWore</key>
+		<date>2017-09-11T18:17:43Z</date>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>Drugi</string>
+		<key>color</key>
+		<dict>
+			<key>red</key>
+			<integer>0</integer>
+			<key>blue</key>
+			<integer>0</integer>
+			<key>green</key>
+			<integer>0</integer>
+		</dict>
+		<key>lastWore</key>
+		<date>2017-09-11T18:17:43Z</date>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>Trzeci</string>
+		<key>color</key>
+		<dict>
+			<key>red</key>
+			<integer>0</integer>
+			<key>blue</key>
+			<integer>0</integer>
+			<key>green</key>
+			<integer>0</integer>
+		</dict>
+		<key>lastWore</key>
+		<date>2017-09-11T18:17:43Z</date>
+	</dict>
+	<dict>
+		<key>name</key>
+		<string>Czwarty</string>
+		<key>color</key>
+		<dict>
+			<key>red</key>
+			<integer>0</integer>
+			<key>blue</key>
+			<integer>0</integer>
+			<key>green</key>
+			<integer>0</integer>
+		</dict>
+		<key>lastWore</key>
+		<date>2017-09-11T18:17:43Z</date>
+	</dict>
+</array>
+</plist>
